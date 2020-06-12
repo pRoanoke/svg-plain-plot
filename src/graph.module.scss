@@ -1,0 +1,27 @@
+.chart {
+  margin-top: 20px;
+  &Grid {
+    stroke-dashoffset: 1;
+    stroke-dasharray: 1;
+  }
+
+  .strokeValue {
+    font-size: 10px;
+  }
+
+  &Line {
+    fill: none;
+    stroke: #4ccaff;
+    stroke-width: 2px;
+  }
+
+  &Dot {
+    fill: #2f7da8;
+  }
+}
+
+@keyframes dash {
+  100% {
+    stroke-dashoffset: 0;
+  }
+}

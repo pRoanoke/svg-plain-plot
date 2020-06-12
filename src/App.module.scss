@@ -1,0 +1,15 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  .controls {
+    display: flex;
+    align-items: flex-end;
+    margin-top: 20px;
+
+    &Group {
+      margin: 0 20px;
+    }
+  }
+}
