@@ -1,21 +1,21 @@
 import React, { useState } from "react";
 import Input from 'antd/lib/input';
 import InputNumber from "antd/lib/input-number";
-import Graph from "./Graph";
+import Index from "@components/Graph";
 import 'antd/dist/antd.css';
-import styles from './App.module.scss';
+import styles from './index.module.scss';
 
 const { Search } = Input;
 
-function App() {
+function Main() {
   const [expression, setExpression] = useState('x');
   const [xRange, setXRange] = useState([-5,5]);
   const [yRange, setYRange] = useState([-5,5]);
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0.5);
 
   return (
     <div className={styles.app}>
-      <Graph height={800} width={1600} expression={expression} step={step} xRange={xRange} yRange={yRange} />
+      <Index height={800} width={1600} expression={expression} step={step} xRange={xRange} yRange={yRange} />
       <div className={styles.controls}>
         <div className={styles.controlsGroup}>
           <Search style={{width: 200}}
@@ -28,12 +28,12 @@ function App() {
         <div className={styles.controlsGroup}>
           Choose range for for X axis:
           <Input.Group compact>
-            <InputNumber value={xRange[0]} onChange={value => setXRange(xRange => {
-              xRange[0] = value;
+            <InputNumber max={xRange[1]+1} value={xRange[0]} onChange={value => setXRange(xRange => {
+              xRange[0] = value < xRange[1] ? value : xRange[1];
               return [...xRange];
             })}
             />
-            <InputNumber value={xRange[1]} onChange={value => setXRange(xRange => {
+            <InputNumber min={xRange[0]+1} value={xRange[1]} onChange={value => setXRange(xRange => {
               xRange[1] = value;
               return [...xRange];
             })}
@@ -43,12 +43,12 @@ function App() {
         <div className={styles.controlsGroup}>
           Choose range for X axis:
           <Input.Group compact>
-            <InputNumber value={yRange[0]} onChange={value => setYRange(yRange => {
+            <InputNumber max={yRange[1]+1} value={yRange[0]} onChange={value => setYRange(yRange => {
               yRange[0] = value;
               return [...yRange];
             })}
             />
-            <InputNumber value={yRange[1]} onChange={value => setYRange(yRange => {
+            <InputNumber min={yRange[0]+1} value={yRange[1]} onChange={value => setYRange(yRange => {
               yRange[1] = value;
               return [...yRange];
             })}
@@ -58,7 +58,7 @@ function App() {
         <div className={styles.controlsGroup}>
             Choose step:
           <Input.Group compact>
-            <InputNumber min={0.1} max={xRange.reduce((acc, value) => Math.abs(acc + value), 0)} step={0.1} value={step} onChange={value => setStep(value)} />
+            <InputNumber min={0.25} max={xRange.reduce((acc, value) => Math.abs(acc + value), 0)} step={0.1} value={step} onChange={value => value && setStep(value)} />
           </Input.Group>
         </div>
       </div>
@@ -66,4 +66,4 @@ function App() {
   );
 }
 
-export default App;
+export default Main;

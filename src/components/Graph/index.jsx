@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
-import styles from "./graph.module.scss"
+import styles from "./index.module.scss"
 import notification from "antd/lib/notification";
+import parseExpression from "@helpers/parseExpression";
 
 function Graph({
                  height = 650,
@@ -23,15 +24,12 @@ function Graph({
 
   useEffect(() => {
     try {
-      const parsedExpression = parseExpression(expression);
-      /* Eval is unsafe, so let's test if we really have an expression to proceed */
-      if (/[^x\d*/+-]/.test(parsedExpression)) return notification.error({message: 'Forbidden characters'});
       const resultCoordinates = [];
 
       for (let x = xRange[0]; x <= xRange[1]; x += step) {
         /* No dividing by zero */
         if (/.+\/[a-zA-Z]/.test(expression) && x === 0) continue;
-        const y = eval(parsedExpression);
+        const y = parseExpression(expression, x);
         if (typeof y !== "number") throw new Error();
         resultCoordinates.push([x, y])
       }
@@ -140,7 +138,7 @@ function Graph({
                   L ${width / 2 + 3}, ${y0 + 10}`}
             stroke="grey"
       />
-      {chartValues && drawChart(chartValues)}
+      {chartValues && !!chartValues.length && drawChart(chartValues)}
     </svg>
   );
 }
