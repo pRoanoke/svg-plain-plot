@@ -40,7 +40,7 @@ function Graph({
       }, 0)
 
     }
-  }, [expression, step]);
+  }, [expression, step, yRange, xRange]);
 
   useEffect(() => {
     try {
@@ -105,8 +105,6 @@ function Graph({
       <g>
         {xStrokes.map((item, index, {length: strokesCount}) => {
           let strokeStep = x0 + (index * width / strokesCountX);
-          console.log(offsetX);
-
           return (
             <g key={strokeStep + index}>
               <line x1={x0 + strokeStep} y1={y0} x2={x0 + strokeStep} y2={height} stroke="#ddd"

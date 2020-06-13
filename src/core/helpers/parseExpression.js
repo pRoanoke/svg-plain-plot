@@ -6,6 +6,8 @@ const tgRegExp = /tg\(.+?\){1,2}/;
 const sqrRegExp = /(\d+?x?|x?)\^/g;
 const invalidExpression = /[^\d\-/*+().e]/;
 
+//TODO: MAKE PARSER WORK WITH RANDOM ORDER
+
 const parseExpression = (expression, x) => {
   let parsedExpresion = expression;
   if (sqrtRegExp.test(parsedExpresion)) {

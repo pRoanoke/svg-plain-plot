@@ -9,17 +9,35 @@ test('should correctly work with kx functions', () => {
 });
 
 test('should prevent "xx" constructions', () => {
-  expect(parseExpression('xx', 1)).toBe(null);
+  expect(parseExpression('xx', 1)).toStrictEqual(Error('Please, remove duplicates'));
 });
 
-test('should prevent forbidden characters', () => {
-  expect(parseExpression('ax', 1)).toBe(null);
+test('should prevent forbidden characters and misses', () => {
+  expect(parseExpression('ax', 1)).toStrictEqual(Error('Forbidden characters'));
+  //still failed
+  expect(parseExpression('sin(x))', 12)).toStrictEqual(Error('Forbidden characters'));
 });
 
-test('Correctly counts strong expressions', () => {
-  expect(parseExpression('x*x/x*1+3*5-5', 5)).toBe(15);
+test('Correctly counts sin', () => {
+  expect(parseExpression('sin(x)', 90)).toBe(0.8939966636005579);
 });
 
-test('Prevents dividing by zero', () => {
-  expect(parseExpression('1/0', 1)).toBe(null);
+test('Correctly counts cos', () => {
+  expect(parseExpression('cos(x)', 45)).toBe(0.5253219888177297);
+});
+
+test('Correctly counts tg', () => {
+  expect(parseExpression('tg(x)', 2)).toBe(-2.185039863261519);
+});
+
+test('Correctly counts sqrt', () => {
+  expect(parseExpression('sqrt(x)', 4)).toBe(2);
+});
+
+test('Correctly counts sqr', () => {
+  expect(parseExpression('x^2', 2)).toBe(4);
+});
+
+test('Correctly counts very hard expressions', () => {
+  expect(parseExpression('tg(sin(x)^cos(x))', 5)).toBe(-0.27892389797590184);
 });
