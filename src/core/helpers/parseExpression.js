@@ -1,19 +1,89 @@
+const kx = /\dx/;
+const sqrtRegExp = /sqrt\(.+?\)+/;
+const sinRegExp = /sin\(.+?\)+/;
+const cosRegExp = /cos\(.+?\){1,2}/;
+const tgRegExp = /tg\(.+?\){1,2}/;
+const sqrRegExp = /(\d+?x?|x?)\^/g;
+const invalidExpression = /[^\d\-/*+().e]/;
+
 const parseExpression = (expression, x) => {
-  let replacedExpression = expression;
+  let parsedExpresion = expression;
+  if (sqrtRegExp.test(parsedExpresion)) {
+    const sqrtExpression = parsedExpresion.match(sqrtRegExp)[0].slice(5, -1);
+    const evaluatedSqrt = parseSqrt(sqrtExpression, x);
+    if (isNaN(evaluatedSqrt)) return;
+    parsedExpresion = parsedExpresion.replace(sqrtRegExp, evaluatedSqrt)
+  }
+
+  if (cosRegExp.test(parsedExpresion)) {
+    const cosExpression = parsedExpresion.match(cosRegExp)[0].slice(4, -1);
+    const evaluatedCos = parseCos(cosExpression, x);
+    parsedExpresion = parsedExpresion.replace(cosRegExp, evaluatedCos)
+  }
+
+  if (tgRegExp.test(parsedExpresion)) {
+    const tgExpression = parsedExpresion.match(tgRegExp)[0].slice(3, -1);
+    const evaluatedTg = parseTg(tgExpression, x);
+    parsedExpresion = parsedExpresion.replace(tgRegExp, evaluatedTg)
+  }
+
+  if (sinRegExp.test(parsedExpresion)) {
+    const sinExpression = parsedExpresion.match(sinRegExp)[0].slice(4, -1);
+    const evaluatedSin = parseSin(sinExpression, x);
+    parsedExpresion = parsedExpresion.replace(sinRegExp, evaluatedSin)
+  }
+
+  if (sqrRegExp.test(parsedExpresion)) {
+    parsedExpresion.match(sqrRegExp).forEach((item) => {
+      const replacedAndWrapped = item.replace(/.+/, `(${item.slice(0, -1)})**`);
+      parsedExpresion = parsedExpresion.replace(item, replacedAndWrapped)
+    })
+  }
+
   /* Prevent duplicated x */
-  if (/x{2,}/.test(replacedExpression)) return null;
+  if (/x{2,}/.test(parsedExpresion)) return Error('Please, remove duplicates');
   /* Support to unary minus */
-  if (/\(-x\)/.test(replacedExpression)) replacedExpression = replacedExpression.replace(/\(-x\)/g, `${x * -1}`);
+  if (/\(-x\)/.test(parsedExpresion)) parsedExpresion = parsedExpresion.replace(/\(-x\)/g, `${x * -1}`);
+  if (kx.test(parsedExpresion)) Array.from(parsedExpresion.matchAll(/\dx/g)).forEach(item => parsedExpresion = parsedExpresion.replace(kx, `${parsedExpresion[item.index]}*${x}`));
   /* Replacing kx construction */
-  Array.from(replacedExpression.matchAll(/\dx/g)).forEach(item => replacedExpression = replacedExpression.replace(/\dx/g, `${replacedExpression[item.index]}*${x}`));
+  parsedExpresion = replaceX(parsedExpresion, x);
   /* Replace x by current */
-  replacedExpression = replacedExpression.replace(/x/g, x);
-  /* Eval is unsafe, so let's test if we really have an expression to proceed */
-  if (/[^()\d*/+-.]/.test(replacedExpression)) return null;
-  const evaluatedExpression = eval(replacedExpression);
-  /* Check for zero dividing */
-  if (evaluatedExpression === Infinity) return null;
-  return evaluatedExpression;
+
+  /* Eval is unsafe, but let's test is it really mathematical expression by generated RegExp */
+  if (invalidExpression.test(parsedExpresion)) return Error('Forbidden characters');
+
+  /* window.Function() is faster than eval() */
+  return Function('', `return ${parsedExpresion}`)();
+};
+
+const replaceX = (expression, x) => expression.replace(/x/g, x);
+
+const parseSqrt = (expression, x) => {
+  if (invalidExpression.test(expression)) {
+    return parseSqrt(parseExpression(expression, x), x);
+  }
+  return Math.sqrt(expression);
+};
+
+const parseSin = (expression, x) => {
+  if (invalidExpression.test(expression)) {
+    return parseSin(parseExpression(expression, x), x);
+  }
+  return Math.sin(expression)
+};
+
+const parseCos = (expression, x) => {
+  if (invalidExpression.test(expression)) {
+    return parseCos(parseExpression(expression, x), x);
+  }
+  return Math.cos(expression)
+};
+
+const parseTg = (expression, x) => {
+  if (invalidExpression.test(expression)) {
+    return parseTg(parseExpression(expression, x), x);
+  }
+  return Math.tan(expression)
 };
 
 export default parseExpression;
