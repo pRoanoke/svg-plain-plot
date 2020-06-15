@@ -19,7 +19,6 @@ const parseExpression = (expression, x) => {
 
   if (sqrtRegExp.test(parsedExpresion)) {
     const sqrtExpression = parsedExpresion.match(sqrtRegExp)[0].match(/\(([^)(]*?)\)/g)[0].slice(1, -1);
-    console.log(sqrtExpression);
     const evaluatedSqrt = parseSqrt(sqrtExpression, x);
     if (isNaN(evaluatedSqrt)) return;
     parsedExpresion = parsedExpresion.replace(sqrtRegExp, `(${evaluatedSqrt})`)
