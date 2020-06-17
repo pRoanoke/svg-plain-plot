@@ -16,18 +16,23 @@ function Main() {
   const [yRange, setYRange] = useState([-5,5]);
   const [step, setStep] = useState(1);
   const [selectedMethod, setMethod] = useState('svg');
+  // To prevent wolfram requests until hit execute
+  const [debounce, increment] = useState(0);
 
   return (
     <div className={styles.app}>
       {selectedMethod === 'svg' && <Graph height={800} width={1600} expression={expression} step={step} xRange={xRange} yRange={yRange} />}
-      {selectedMethod === 'wolfram' && <WolframPlot height={800} width={1600} expression={expression} xRange={xRange} yRange={yRange} />}
+      {selectedMethod === 'wolfram' && <WolframPlot height={800} width={1600} expression={expression} xRange={xRange} yRange={yRange} debounce={debounce}/>}
       <div className={styles.controls}>
         <div className={styles.controlsGroup}>
           <Search style={{width: 400}}
                  addonBefore="y ="
-                 placeholder="x"
+                 defaultValue="x"
                  enterButton="Execute"
-                 onSearch={value => setExpression(value)}
+                 onSearch={value => {
+                   increment(debounce => debounce + 1);
+                   setExpression(value)
+                 }}
           />
         </div>
         <div className={styles.controlsGroup}>

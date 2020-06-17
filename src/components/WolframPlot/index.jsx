@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import Spin from "antd/lib/spin";
-import WolframAlphaAPI from 'wolfram-alpha-api';
+import styles from './index.module.scss';
+import Alert from "antd/lib/alert";
+
 
 // It is better to use .env but I have to const this to show you the result
 const appid = "V9P8A8-5PGWEQHT6J";
-const waApi = WolframAlphaAPI(appid);
+const corsProxy = "https://cors-anywhere.herokuapp.com/";
 
 function WolframPlot({
                        height = 650,
@@ -12,22 +14,50 @@ function WolframPlot({
                        expression = "x",
                        xRange = [-5, 5],
                        yRange = [-5, 5],
+                       debounce = 0,
                      }) {
   const [plot, setPlot] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Unfortunately it is impossible due to cors policy
+    setPlot(null);
     async function parseExpression() {
-      const apiResult = await waApi.getFull(expression);
-      console.log(apiResult);
+      if (loading) return;
+
+      setLoading(true);
+      try {
+        const response = await fetch(`${corsProxy}http://api.wolframalpha.com/v1/simple?appid=${appid}&input=plot ${expression} from x=${xRange[0]} to ${xRange[1]} y=${yRange[0]} to ${yRange[1]}`);
+        if (!(response.headers.get('Content-Type') === 'image/gif')) return setError('Something went wrong, when we tried to fetch from Wolfram Alpha');
+        const image = await response.blob();
+        const fileReaderInstance = new FileReader();
+        fileReaderInstance.readAsDataURL(image);
+        fileReaderInstance.onload = () => {
+          const base64data = fileReaderInstance.result;
+          setPlot(base64data);
+        };
+        setLoading(false);
+      } catch(err) {
+        setError(err.message);
+        setLoading(false);
+      }
     }
 
     parseExpression();
-  }, [expression, xRange, yRange]);
+
+  }, [expression, xRange, yRange, debounce]);
 
   return (
-    <div>
-      {!plot && <Spin />}
+    <div className={styles.wrapper} style={{ minHeight: height }}>
+      {loading && !error && <Spin/>}
+      {error && (
+        <Alert
+          message="Error:"
+          description={error}
+          type="error"
+        />
+      )}
+      {plot && !error && <img src={plot} />}
     </div>
   )
 }
